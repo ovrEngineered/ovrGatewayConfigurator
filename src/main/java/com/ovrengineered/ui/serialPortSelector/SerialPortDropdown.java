@@ -18,6 +18,9 @@ package com.ovrengineered.ui.serialPortSelector;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
+import java.util.prefs.Preferences;
+
 import javax.swing.JComboBox;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
@@ -30,12 +33,29 @@ import com.fazecast.jSerialComm.SerialPort;
  */
 public class SerialPortDropdown extends JComboBox<SerialPort> implements PopupMenuListener
 {
+	private static final String KEY_LAST_SELECTED = "key_last_selected";
+	
 
+	private final Preferences prefs = Preferences.userRoot().node(this.getClass().getName());
+	
+	
 	public SerialPortDropdown()
 	{
 		super();
 		this.addPopupMenuListener(this);
 		this.setRenderer(new SerialPortRenderer());
+		
+		List<SerialPort> ports = Arrays.asList(SerialPort.getCommPorts());
+		String lastSelectedString = prefs.get(KEY_LAST_SELECTED, "");
+		for( int i = 0; i < ports.size(); i++ )
+		{
+			SerialPort currPort = ports.get(i);
+			this.addItem(currPort);
+			if( currPort.getSystemPortName().equals(lastSelectedString) )
+			{
+				this.setSelectedIndex(i);
+			}
+		}
 	}
 	
 	
@@ -66,5 +86,9 @@ public class SerialPortDropdown extends JComboBox<SerialPort> implements PopupMe
 
 
 	@Override
-	public void popupMenuWillBecomeInvisible(PopupMenuEvent arg0){}
+	public void popupMenuWillBecomeInvisible(PopupMenuEvent arg0)
+	{
+		Preferences prefs = Preferences.userRoot().node(this.getClass().getName());
+		prefs.put(KEY_LAST_SELECTED, this.getSelectedItem().getSystemPortName());
+	}
 }

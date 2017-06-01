@@ -14,9 +14,12 @@ import javax.swing.JOptionPane;
 import javax.swing.border.TitledBorder;
 
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.prefs.Preferences;
 
 
 /**
@@ -30,6 +33,8 @@ public class SerialPortSelector extends JPanel
 	private static final String DISCONNECTED_STRING = "Connect";
 	private static final String CONNECTED_STRING = "Disconnect";
 	
+	private static final String KEY_LAST_SELECTED = "key_last_selected";
+	
 	
 	private JButton btnConnect;
 	private JComboBox<Integer> cmbBaudRate;
@@ -38,6 +43,9 @@ public class SerialPortSelector extends JPanel
 	private SerialPort serialPort = null;
 	private SerialPortDropdown serialPortDropdown;
 	private List<SerialPortChangeListener> changeListeners = new ArrayList<SerialPortChangeListener>();
+	
+	
+	private final Preferences prefs = Preferences.userRoot().node(this.getClass().getName());
 	
 	
 	/**
@@ -61,6 +69,27 @@ public class SerialPortSelector extends JPanel
 		add(serialPortDropdown, "2, 2, fill, default");
 		
 		cmbBaudRate = new JComboBox<Integer>(new Integer[] {9600, 115200});
+		cmbBaudRate.addItemListener(new ItemListener(){
+
+			@Override
+			public void itemStateChanged(ItemEvent e)
+			{
+				if( e.getStateChange() == ItemEvent.SELECTED )
+				{
+					SerialPortSelector.this.prefs.putInt(KEY_LAST_SELECTED, ((Integer)e.getItem()).intValue());
+				}
+			}
+		});
+		int lastSelectedVal = this.prefs.getInt(KEY_LAST_SELECTED, 0);
+		for( int i = 0; i < cmbBaudRate.getItemCount(); i++ )
+		{
+			Object currItem_raw = cmbBaudRate.getItemAt(i);
+			if( !(currItem_raw instanceof Integer) ) continue;
+			if( ((Integer)cmbBaudRate.getItemAt(i)).intValue() == lastSelectedVal )
+			{	
+				cmbBaudRate.setSelectedIndex(i);
+			}
+		}
 		add(cmbBaudRate, "4, 2, fill, default");
 		
 		btnConnect = new JButton("Connect");

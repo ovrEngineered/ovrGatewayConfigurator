@@ -1,4 +1,4 @@
-package com.ovrengineered.ovrSerialConsole;
+package com.ovrengineered.ovrGatewayConfigurator;
 
 import com.jediterm.terminal.TerminalColor;
 import com.jediterm.terminal.TextStyle;
